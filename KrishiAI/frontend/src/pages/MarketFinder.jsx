@@ -7,6 +7,7 @@ import { StateBanner } from '../components/StateBanner.jsx'
 import { fetchBestMarket } from '../lib/api.js'
 import { chartTheme } from '../lib/charts.js'
 import { CROPS, DISTRICTS } from '../lib/constants.js'
+import { useT } from '../lib/i18n.js'
 
 function money(v) {
   if (v === null || v === undefined || Number.isNaN(Number(v))) return '—'
@@ -14,6 +15,7 @@ function money(v) {
 }
 
 export function MarketFinder() {
+  const { t, tCrop, tDistrict } = useT()
   const crops = useMemo(() => CROPS, [])
   const districts = useMemo(() => DISTRICTS, [])
 
@@ -30,7 +32,7 @@ export function MarketFinder() {
       const data = await fetchBestMarket({ crop, district })
       setResult(data)
     } catch (e) {
-      setError(e.message || 'Market finder failed')
+      setError(e.message || t('common.error'))
       setResult(null)
     } finally {
       setLoading(false)
@@ -41,10 +43,10 @@ export function MarketFinder() {
   const top = series.slice(0, 10)
   const theme = chartTheme()
   const barData = {
-    labels: top.map((x) => x.district),
+    labels: top.map((x) => tDistrict(x.district)),
     datasets: [
       {
-        label: 'Price (₹/kg)',
+        label: t('prediction.pricePerKg') || 'Price (₹/kg)',
         data: top.map((x) => x.price),
         backgroundColor: 'rgba(34, 197, 94, 0.30)',
         borderColor: 'rgba(34, 197, 94, 0.65)',
@@ -56,11 +58,11 @@ export function MarketFinder() {
   return (
     <div className="space-y-8">
       <StateBanner
-        title="Market Finder"
-        subtitle="Find the best district to sell a crop using price comparisons across Karnataka."
+        title={t('marketFinder.title')}
+        subtitle={t('marketFinder.description')}
         right={
           <div className="hidden rounded-2xl bg-white/5 p-4 ring-1 ring-white/10 md:block">
-            <div className="text-xs text-white/60">API</div>
+            <div className="text-xs text-white/60">{t('common.api')}</div>
             <div className="mt-1 font-mono text-xs text-white/70">GET /best-market</div>
           </div>
         }
@@ -68,9 +70,9 @@ export function MarketFinder() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <GlassCard className="p-6 lg:col-span-1 lg:sticky lg:top-28 lg:self-start">
-          <div className="text-sm font-semibold">Inputs</div>
+          <div className="text-sm font-semibold">{t('marketFinder.inputs')}</div>
           <div className="mt-4 grid gap-4">
-            <Field label="Crop name">
+            <Field label={t('prediction.cropName')}>
               <select
                 value={crop}
                 onChange={(e) => setCrop(e.target.value)}
@@ -78,13 +80,13 @@ export function MarketFinder() {
               >
                 {crops.map((c) => (
                   <option key={c} value={c}>
-                    {c}
+                    {tCrop(c)}
                   </option>
                 ))}
               </select>
             </Field>
 
-            <Field label="Your district (optional)" hint="Used as baseline in UI">
+            <Field label={t('marketFinder.yourDistrict')} hint={t('marketFinder.baselineHint')}>
               <select
                 value={district}
                 onChange={(e) => setDistrict(e.target.value)}
@@ -92,7 +94,7 @@ export function MarketFinder() {
               >
                 {districts.map((d) => (
                   <option key={d} value={d}>
-                    {d}
+                    {tDistrict(d)}
                   </option>
                 ))}
               </select>
@@ -103,7 +105,7 @@ export function MarketFinder() {
               disabled={loading}
               className="rounded-xl bg-gradient-to-r from-emerald-400 to-sky-400 px-5 py-3 text-sm font-semibold text-ink-950 transition hover:opacity-95 disabled:opacity-50"
             >
-              {loading ? 'Finding…' : 'Find best market'}
+              {loading ? t('marketFinder.finding') : t('marketFinder.findBestMarket')}
             </button>
 
             {error ? (
@@ -117,19 +119,19 @@ export function MarketFinder() {
         <GlassCard className="p-6 lg:col-span-2">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="text-sm font-semibold">Recommendation</div>
+              <div className="text-sm font-semibold">{t('marketFinder.recommendation')}</div>
               <div className="mt-1 text-xs text-white/60">
-                {result ? 'Best market identified' : 'Run to see best district'}
+                {result ? t('marketFinder.bestMarketIdentified') : t('marketFinder.runToSee')}
               </div>
             </div>
             {result ? (
               <div className="flex flex-wrap gap-2">
                 <div className="rounded-2xl bg-white/5 px-4 py-2 ring-1 ring-white/10">
-                  <div className="text-[11px] text-white/60">Best district</div>
-                  <div className="text-sm font-semibold">{result.best_district}</div>
+                  <div className="text-[11px] text-white/60">{t('marketFinder.bestDistrict')}</div>
+                  <div className="text-sm font-semibold">{tDistrict(result.best_district)}</div>
                 </div>
                 <div className="rounded-2xl bg-gradient-to-r from-emerald-400/15 to-sky-400/15 px-4 py-2 ring-1 ring-white/10">
-                  <div className="text-[11px] text-white/60">Best price</div>
+                  <div className="text-[11px] text-white/60">{t('marketFinder.bestPrice')}</div>
                   <div className="text-sm font-semibold">{money(result.best_price)}</div>
                 </div>
               </div>
@@ -139,7 +141,7 @@ export function MarketFinder() {
           <div className="mt-5 rounded-2xl bg-black/20 p-4 ring-1 ring-white/10">
             <div className="flex items-center justify-between gap-3">
               <div className="text-xs font-semibold uppercase tracking-wider text-white/60">
-                Top districts by price
+                {t('marketFinder.chartTitle')}
               </div>
               <div className="text-xs text-white/50">Chart.js</div>
             </div>
@@ -162,7 +164,7 @@ export function MarketFinder() {
             </div>
             {!series.length ? (
               <div className="mt-3 text-xs text-white/50">
-                Run the market finder to load comparison prices.
+                {t('marketFinder.chartPlaceholder')}
               </div>
             ) : null}
           </div>

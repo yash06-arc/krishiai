@@ -7,8 +7,10 @@ import { StateBanner } from '../components/StateBanner.jsx'
 import { fetchPrices } from '../lib/api.js'
 import { chartTheme } from '../lib/charts.js'
 import { CROPS } from '../lib/constants.js'
+import { useT } from '../lib/i18n.js'
 
 export function DistrictComparison() {
+  const { t, tCrop, tDistrict } = useT()
   const crops = useMemo(() => CROPS, [])
   const [crop, setCrop] = useState('Tomato')
   const [loading, setLoading] = useState(true)
@@ -21,12 +23,12 @@ export function DistrictComparison() {
     setError('')
     fetchPrices({ crop })
       .then((d) => alive && setRows(d?.items || []))
-      .catch((e) => alive && setError(e.message || 'Failed to load prices'))
+      .catch((e) => alive && setError(e.message || t('common.error')))
       .finally(() => alive && setLoading(false))
     return () => {
       alive = false
     }
-  }, [crop])
+  }, [crop, t])
 
   const sorted = useMemo(() => {
     const arr = [...rows]
@@ -36,10 +38,10 @@ export function DistrictComparison() {
 
   const theme = chartTheme()
   const barData = {
-    labels: sorted.map((r) => r.district),
+    labels: sorted.map((r) => tDistrict(r.district)),
     datasets: [
       {
-        label: 'Price (₹/kg)',
+        label: t('prediction.pricePerKg') || 'Price (₹/kg)',
         data: sorted.map((r) => r.price),
         backgroundColor: 'rgba(96, 165, 250, 0.28)',
         borderColor: 'rgba(96, 165, 250, 0.65)',
@@ -51,15 +53,15 @@ export function DistrictComparison() {
   return (
     <div className="space-y-8">
       <StateBanner
-        title="District Comparison"
-        subtitle="Compare one crop’s prices across all Karnataka districts with a bar chart."
+        title={t('districtComparison.title')}
+        subtitle={t('districtComparison.description')}
       />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <GlassCard className="p-6 lg:col-span-1 lg:sticky lg:top-28 lg:self-start">
-          <div className="text-sm font-semibold">Crop</div>
+          <div className="text-sm font-semibold">{t('livePrices.crop')}</div>
           <div className="mt-4 grid gap-4">
-            <Field label="Select crop">
+            <Field label={t('prediction.cropName')}>
               <select
                 value={crop}
                 onChange={(e) => setCrop(e.target.value)}
@@ -67,17 +69,16 @@ export function DistrictComparison() {
               >
                 {crops.map((c) => (
                   <option key={c} value={c}>
-                    {c}
+                    {tCrop(c)}
                   </option>
                 ))}
               </select>
             </Field>
 
             <div className="rounded-2xl bg-white/5 p-4 text-sm text-white/70 ring-1 ring-white/10">
-              <div className="font-semibold text-white">Insight</div>
+              <div className="font-semibold text-white">{t('districtComparison.insight')}</div>
               <div className="mt-1 text-white/65">
-                This view highlights districts with the best selling opportunity for{' '}
-                <span className="font-semibold">{crop}</span>.
+                {t('districtComparison.insightDesc')} <span className="font-semibold">{tCrop(crop)}</span>.
               </div>
             </div>
 
@@ -92,9 +93,9 @@ export function DistrictComparison() {
         <GlassCard className="p-6 lg:col-span-2">
           <div className="flex items-end justify-between gap-3">
             <div>
-              <div className="text-sm font-semibold">Prices across districts</div>
+              <div className="text-sm font-semibold">{t('districtComparison.pricesAcross')}</div>
               <div className="mt-1 text-xs text-white/60">
-                {loading ? 'Loading…' : `${sorted.length} districts`}
+                {loading ? t('common.loading') : `${sorted.length} districts`}
               </div>
             </div>
           </div>
@@ -119,7 +120,7 @@ export function DistrictComparison() {
             </div>
             {!sorted.length ? (
               <div className="mt-3 text-xs text-white/50">
-                No data yet. Check backend is running.
+                {t('common.noData')}
               </div>
             ) : null}
           </div>

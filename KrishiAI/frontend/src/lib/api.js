@@ -9,7 +9,6 @@ async function httpGet(path, params) {
       url.searchParams.set(k, String(v))
     })
   }
-
   const res = await fetch(url.toString())
   if (!res.ok) {
     const text = await res.text().catch(() => '')
@@ -18,6 +17,20 @@ async function httpGet(path, params) {
   return res.json()
 }
 
+async function httpPost(path, data) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new Error(`Request failed (${res.status}): ${text || res.statusText}`)
+  }
+  return res.json()
+}
+
+// ── Core price/market endpoints ──────────────────────────────────────────────
 export async function fetchPrices({ crop, district } = {}) {
   return httpGet('/prices', { crop, district })
 }
@@ -50,16 +63,41 @@ export async function fetchDemandForecast({ crop } = {}) {
   return httpGet('/demand-forecast', { crop })
 }
 
-export async function chatWithFarmerBot({ message } = {}) {
-  const res = await fetch(`${API_BASE}/chat`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message }),
-  })
-  if (!res.ok) {
-    const text = await res.text().catch(() => '')
-    throw new Error(`Request failed (${res.status}): ${text || res.statusText}`)
-  }
-  return res.json()
+// ── Weather endpoints  (/api/weather/...) ────────────────────────────────────
+export async function fetchWeatherCurrent(location = 'Bangalore') {
+  return httpGet('/api/weather/current', { location })
 }
 
+export async function fetchWeatherForecast(location = 'Bangalore') {
+  return httpGet('/api/weather/forecast', { location })
+}
+
+export async function fetchWeatherInsights(location = 'Bangalore', crop = 'Tomato') {
+  return httpGet('/api/weather/insights', { location, crop })
+}
+
+// ── Mandi Leaderboard endpoints  (/api/leaderboard/...) ──────────────────────
+export async function fetchLeaderboardOverall() {
+  return httpGet('/api/leaderboard/overall')
+}
+
+export async function fetchLeaderboard({ item } = {}) {
+  return httpGet('/api/leaderboard', { item })
+}
+
+export async function fetchFarmerCommitments(farmerId) {
+  return httpGet(`/api/commitments/${encodeURIComponent(farmerId)}`)
+}
+
+export async function registerSupply(data) {
+  return httpPost('/api/register-supply', data)
+}
+
+export async function confirmDelivery(data) {
+  return httpPost('/api/confirm-delivery', data)
+}
+
+// ── Chatbot ──────────────────────────────────────────────────────────────────
+export async function chatWithFarmerBot({ message, lang = 'en' } = {}) {
+  return httpPost('/chat', { message, lang })
+}

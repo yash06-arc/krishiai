@@ -7,6 +7,7 @@ import { StateBanner } from '../components/StateBanner.jsx'
 import { fetchLogisticsEstimate } from '../lib/api.js'
 import { chartTheme } from '../lib/charts.js'
 import { CROPS, DISTRICTS } from '../lib/constants.js'
+import { useT } from '../lib/i18n.js'
 
 function money(v) {
   if (v === null || v === undefined || Number.isNaN(Number(v))) return '—'
@@ -14,6 +15,7 @@ function money(v) {
 }
 
 export function LogisticsEstimator() {
+  const { t, tCrop, tDistrict } = useT()
   const crops = useMemo(() => CROPS, [])
   const districts = useMemo(() => DISTRICTS, [])
 
@@ -55,15 +57,15 @@ export function LogisticsEstimator() {
   return (
     <div className="space-y-8">
       <StateBanner
-        title="Logistics Cost Estimator"
-        subtitle="Compare transport cost versus selling profit for each district."
+        title={t('logistics.title')}
+        subtitle={t('logistics.subtitle')}
       />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <GlassCard className="p-6 lg:col-span-1 lg:sticky lg:top-28 lg:self-start">
-          <div className="text-sm font-semibold">Inputs</div>
+          <div className="text-sm font-semibold">{t('profitOptimizer.inputs')}</div>
           <div className="mt-4 grid gap-4">
-            <Field label="Crop">
+            <Field label={t('marketFinder.inputs')}>
               <select
                 value={crop}
                 onChange={(e) => setCrop(e.target.value)}
@@ -71,12 +73,12 @@ export function LogisticsEstimator() {
               >
                 {crops.map((c) => (
                   <option key={c} value={c}>
-                    {c}
+                    {tCrop(c)}
                   </option>
                 ))}
               </select>
             </Field>
-            <Field label="Your base district">
+            <Field label={t('logistics.baseDistrict')}>
               <select
                 value={baseDistrict}
                 onChange={(e) => setBaseDistrict(e.target.value)}
@@ -84,7 +86,7 @@ export function LogisticsEstimator() {
               >
                 {districts.map((d) => (
                   <option key={d} value={d}>
-                    {d}
+                    {tDistrict(d)}
                   </option>
                 ))}
               </select>
@@ -94,7 +96,7 @@ export function LogisticsEstimator() {
               disabled={loading}
               className="rounded-xl bg-gradient-to-r from-emerald-400 to-sky-400 px-5 py-3 text-sm font-semibold text-ink-950 transition hover:opacity-95 disabled:opacity-50"
             >
-              {loading ? 'Estimating…' : 'Estimate logistics'}
+              {loading ? t('logistics.running') : t('logistics.run')}
             </button>
             {error ? (
               <div className="rounded-2xl bg-red-500/10 px-3 py-2 text-xs text-red-200 ring-1 ring-red-500/20">
@@ -105,7 +107,7 @@ export function LogisticsEstimator() {
         </GlassCard>
 
         <GlassCard className="p-6 lg:col-span-2">
-          <div className="text-sm font-semibold">Logistics table</div>
+          <div className="text-sm font-semibold">{t('logistics.table')}</div>
           <div className="mt-2 text-xs text-white/60">
             Distances are estimated using district coordinates; cost = distance × 0.05.
           </div>
@@ -115,17 +117,17 @@ export function LogisticsEstimator() {
               <table className="w-full text-left text-sm">
                 <thead className="sticky top-0 bg-ink-900/80 backdrop-blur">
                   <tr className="text-xs uppercase tracking-wider text-white/60">
-                    <th className="px-4 py-3">District</th>
-                    <th className="px-4 py-3">Price</th>
-                    <th className="px-4 py-3">Distance (km)</th>
-                    <th className="px-4 py-3">Transport cost</th>
-                    <th className="px-4 py-3">Net profit</th>
+                    <th className="px-4 py-3">{t('logistics.district')}</th>
+                    <th className="px-4 py-3">{t('logistics.price')}</th>
+                    <th className="px-4 py-3">{t('logistics.distance')}</th>
+                    <th className="px-4 py-3">{t('logistics.transportCost')}</th>
+                    <th className="px-4 py-3">{t('logistics.netProfit')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/10">
                   {estimates.map((e) => (
                     <tr key={e.district} className="hover:bg-white/5">
-                      <td className="px-4 py-3 font-semibold">{e.district}</td>
+                      <td className="px-4 py-3 font-semibold">{tDistrict(e.district)}</td>
                       <td className="px-4 py-3">{money(e.price)}</td>
                       <td className="px-4 py-3 text-white/80">{e.distance_km}</td>
                       <td className="px-4 py-3">{money(e.transport_cost)}</td>
@@ -147,9 +149,9 @@ export function LogisticsEstimator() {
           <div className="mt-6 rounded-2xl bg-black/25 p-4 ring-1 ring-white/10">
             <div className="flex items-center justify-between gap-3">
               <div className="text-xs font-semibold uppercase tracking-wider text-white/60">
-                Net profit across districts
+                {t('logistics.netProfit')}
               </div>
-              <div className="text-xs text-white/50">Chart.js</div>
+              <div className="text-xs text-white/50">{t('common.chartjs')}</div>
             </div>
             <div className="mt-3 h-[320px]">
               <Bar

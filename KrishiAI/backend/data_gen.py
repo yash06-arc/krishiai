@@ -5,8 +5,8 @@ import os
 from dataclasses import dataclass
 from datetime import date, timedelta
 
-import numpy as np
-import pandas as pd
+import numpy as np  # type: ignore
+import pandas as pd  # type: ignore
 
 
 DISTRICTS = [
@@ -141,7 +141,7 @@ def generate_prices(spec: DataSpec) -> pd.DataFrame:
                         "Crop": crop,
                         "District": district,
                         "Date": d.isoformat(),
-                        "Price": float(round(price, 2)),
+                        "Price": float(round(price, 2)),  # type: ignore
                     }
                 )
 

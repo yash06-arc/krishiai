@@ -8,6 +8,7 @@ import { StateBanner } from '../components/StateBanner.jsx'
 import { fetchPredict } from '../lib/api.js'
 import { chartTheme } from '../lib/charts.js'
 import { CROPS, DISTRICTS } from '../lib/constants.js'
+import { useT } from '../lib/i18n.js'
 
 function money(v) {
   if (v === null || v === undefined || Number.isNaN(Number(v))) return '—'
@@ -15,6 +16,7 @@ function money(v) {
 }
 
 export function Prediction() {
+  const { t, tCrop, tDistrict } = useT()
   const [params] = useSearchParams()
   const cropFromQuery = params.get('crop') || ''
 
@@ -38,7 +40,7 @@ export function Prediction() {
       const data = await fetchPredict({ crop, district })
       setResult(data)
     } catch (e) {
-      setError(e.message || 'Prediction failed')
+      setError(e.message || t('common.error'))
       setResult(null)
     } finally {
       setLoading(false)
@@ -61,7 +63,7 @@ export function Prediction() {
     labels: combinedLabels,
     datasets: [
       {
-        label: 'Price (₹/kg)',
+        label: t('prediction.pricePerKg') || 'Price (₹/kg)',
         data: combinedPrices,
         borderColor: 'rgba(96, 165, 250, 0.9)',
         backgroundColor: 'rgba(96, 165, 250, 0.12)',
@@ -75,11 +77,11 @@ export function Prediction() {
   return (
     <div className="space-y-8">
       <StateBanner
-        title="AI Price Prediction"
-        subtitle="Enter crop + district, call the Flask API, and visualize prediction with a pitch-ready chart."
+        title={t('prediction.title')}
+        subtitle={t('prediction.description')}
         right={
           <div className="hidden rounded-2xl bg-white/5 p-4 ring-1 ring-white/10 md:block">
-            <div className="text-xs text-white/60">API</div>
+            <div className="text-xs text-white/60">{t('common.api')}</div>
             <div className="mt-1 font-mono text-xs text-white/70">GET /predict</div>
           </div>
         }
@@ -87,9 +89,9 @@ export function Prediction() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <GlassCard className="p-6 lg:col-span-1 lg:sticky lg:top-28 lg:self-start">
-          <div className="text-sm font-semibold">Inputs</div>
+          <div className="text-sm font-semibold">{t('prediction.inputs')}</div>
           <div className="mt-4 grid gap-4">
-            <Field label="Crop name">
+            <Field label={t('prediction.cropName')}>
               <select
                 value={crop}
                 onChange={(e) => setCrop(e.target.value)}
@@ -97,12 +99,12 @@ export function Prediction() {
               >
                 {cropOptions.map((c) => (
                   <option key={c} value={c}>
-                    {c}
+                    {tCrop(c)}
                   </option>
                 ))}
               </select>
             </Field>
-            <Field label="District">
+            <Field label={t('prediction.district')}>
               <select
                 value={district}
                 onChange={(e) => setDistrict(e.target.value)}
@@ -110,7 +112,7 @@ export function Prediction() {
               >
                 {districtOptions.map((d) => (
                   <option key={d} value={d}>
-                    {d}
+                    {tDistrict(d)}
                   </option>
                 ))}
               </select>
@@ -121,7 +123,7 @@ export function Prediction() {
               disabled={loading}
               className="rounded-xl bg-gradient-to-r from-emerald-400 to-sky-400 px-5 py-3 text-sm font-semibold text-ink-950 transition hover:opacity-95 disabled:opacity-50"
             >
-              {loading ? 'Predicting…' : 'Run prediction'}
+              {loading ? t('prediction.predicting') : t('prediction.runPrediction')}
             </button>
 
             {error ? (
@@ -135,23 +137,23 @@ export function Prediction() {
         <GlassCard className="p-6 lg:col-span-2">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="text-sm font-semibold">Result</div>
+              <div className="text-sm font-semibold">{t('prediction.result')}</div>
               <div className="mt-1 text-xs text-white/60">
-                {result ? 'Prediction ready' : 'Run the model to see results'}
+                {result ? t('prediction.predictionReady') : t('prediction.runModelToSee')}
               </div>
             </div>
             {result ? (
               <div className="flex flex-wrap gap-2">
                 <div className="rounded-2xl bg-white/5 px-4 py-2 ring-1 ring-white/10">
-                  <div className="text-[11px] text-white/60">Crop</div>
-                  <div className="text-sm font-semibold">{result.crop}</div>
+                  <div className="text-[11px] text-white/60">{t('prediction.cropName')}</div>
+                  <div className="text-sm font-semibold">{tCrop(result.crop)}</div>
                 </div>
                 <div className="rounded-2xl bg-white/5 px-4 py-2 ring-1 ring-white/10">
-                  <div className="text-[11px] text-white/60">District</div>
-                  <div className="text-sm font-semibold">{result.district}</div>
+                  <div className="text-[11px] text-white/60">{t('prediction.district')}</div>
+                  <div className="text-sm font-semibold">{tDistrict(result.district)}</div>
                 </div>
                 <div className="rounded-2xl bg-gradient-to-r from-emerald-400/15 to-sky-400/15 px-4 py-2 ring-1 ring-white/10">
-                  <div className="text-[11px] text-white/60">Predicted price</div>
+                  <div className="text-[11px] text-white/60">{t('prediction.predictedPrice')}</div>
                   <div className="text-sm font-semibold">{money(result.predicted_price)}</div>
                 </div>
               </div>
@@ -161,7 +163,7 @@ export function Prediction() {
           <div className="mt-5 rounded-2xl bg-black/20 p-4 ring-1 ring-white/10">
             <div className="flex items-center justify-between gap-3">
               <div className="text-xs font-semibold uppercase tracking-wider text-white/60">
-                Crop price trend + forecast
+                {t('prediction.chartTitle')}
               </div>
               <div className="text-xs text-white/50">Chart.js</div>
             </div>
@@ -177,8 +179,7 @@ export function Prediction() {
             </div>
             {!history.length && !forecast.length ? (
               <div className="mt-3 text-xs text-white/50">
-                No series available yet. Once you run prediction, the backend returns a
-                small history + forecast window for visualization.
+                {t('prediction.chartPlaceholder')}
               </div>
             ) : null}
           </div>

@@ -7,6 +7,7 @@ import { StateBanner } from '../components/StateBanner.jsx'
 import { fetchDemand } from '../lib/api.js'
 import { CROPS, DISTRICTS } from '../lib/constants.js'
 import { KARNATAKA_CENTROIDS } from '../lib/karnatakaCentroids.js'
+import { useT } from '../lib/i18n.js'
 
 function colorFor(level) {
   if (level === 'High') return '#ef4444'
@@ -15,6 +16,7 @@ function colorFor(level) {
 }
 
 export function DemandMap() {
+  const { t, tCrop, tDistrict } = useT()
   const crops = useMemo(() => CROPS, [])
   const districts = useMemo(() => DISTRICTS, [])
 
@@ -29,12 +31,12 @@ export function DemandMap() {
     setError('')
     fetchDemand({ crop })
       .then((d) => alive && setItems(d?.items || []))
-      .catch((e) => alive && setError(e.message || 'Failed to load demand'))
+      .catch((e) => alive && setError(e.message || t('common.error')))
       .finally(() => alive && setLoading(false))
     return () => {
       alive = false
     }
-  }, [crop])
+  }, [crop, t])
 
   const byDistrict = useMemo(() => {
     const m = new Map()
@@ -45,11 +47,11 @@ export function DemandMap() {
   return (
     <div className="space-y-8">
       <StateBanner
-        title="Demand Heatmap"
-        subtitle="Interactive Karnataka map overlay showing demand levels (High → red, Medium → orange, Low → green)."
+        title={t('demandMap.title')}
+        subtitle={t('demandMap.description')}
         right={
           <div className="hidden rounded-2xl bg-white/5 p-4 ring-1 ring-white/10 md:block">
-            <div className="text-xs text-white/60">API</div>
+            <div className="text-xs text-white/60">{t('common.api')}</div>
             <div className="mt-1 font-mono text-xs text-white/70">GET /demand</div>
           </div>
         }
@@ -57,9 +59,9 @@ export function DemandMap() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <GlassCard className="p-6 lg:col-span-1 lg:sticky lg:top-28 lg:self-start">
-          <div className="text-sm font-semibold">Filters</div>
+          <div className="text-sm font-semibold">{t('weather.filters')}</div>
           <div className="mt-4 grid gap-4">
-            <Field label="Crop">
+            <Field label={t('prediction.cropName')}>
               <select
                 value={crop}
                 onChange={(e) => setCrop(e.target.value)}
@@ -67,7 +69,7 @@ export function DemandMap() {
               >
                 {crops.map((c) => (
                   <option key={c} value={c}>
-                    {c}
+                    {tCrop(c)}
                   </option>
                 ))}
               </select>
@@ -75,25 +77,25 @@ export function DemandMap() {
 
             <div className="rounded-2xl bg-white/5 p-4 ring-1 ring-white/10">
               <div className="text-xs font-semibold uppercase tracking-wider text-white/60">
-                Legend
+                {t('demandMap.legend')}
               </div>
               <div className="mt-3 grid gap-2 text-sm text-white/75">
                 {[
-                  { l: 'High', c: '#ef4444' },
-                  { l: 'Medium', c: '#f59e0b' },
-                  { l: 'Low', c: '#22c55e' },
+                  { l: t('demandMap.high'), c: '#ef4444' },
+                  { l: t('demandMap.medium'), c: '#f59e0b' },
+                  { l: t('demandMap.low'), c: '#22c55e' },
                 ].map((x) => (
                   <div key={x.l} className="flex items-center gap-2">
                     <span
                       className="h-3 w-3 rounded-full"
                       style={{ backgroundColor: x.c }}
                     />
-                    <span>{x.l} demand</span>
+                    <span>{x.l} {t('livePrices.demand')}</span>
                   </div>
                 ))}
               </div>
               <div className="mt-3 text-xs text-white/50">
-                Overlay uses district centroids (pitch-friendly visualization).
+                {t('demandMap.overlayTip')}
               </div>
             </div>
 
@@ -108,7 +110,7 @@ export function DemandMap() {
         <GlassCard className="p-3 lg:col-span-2">
           <div className="relative overflow-hidden rounded-2xl ring-1 ring-white/10">
             <div className="absolute left-3 top-3 z-[500] rounded-xl bg-black/40 px-3 py-2 text-xs text-white/70 ring-1 ring-white/10 backdrop-blur">
-              {loading ? 'Loading demand…' : `Showing ${crop} demand across Karnataka`}
+              {loading ? t('common.loading') : t('demandMap.showingDemand').replace('{{crop}}', tCrop(crop))}
             </div>
             <MapContainer
               center={[14.6, 76.4]}
@@ -140,8 +142,8 @@ export function DemandMap() {
                   >
                     <Tooltip direction="top" opacity={1} sticky>
                       <div className="text-xs">
-                        <div className="font-semibold">{d}</div>
-                        <div>Demand: {level}</div>
+                        <div className="font-semibold">{tDistrict(d)}</div>
+                        <div>{t('livePrices.demand')}: {level === 'High' ? t('demandMap.high') : level === 'Medium' ? t('demandMap.medium') : t('demandMap.low')}</div>
                       </div>
                     </Tooltip>
                   </CircleMarker>

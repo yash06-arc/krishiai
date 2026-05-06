@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 
 import { CROPS } from '../lib/constants.js'
 import { VideoGuideModal } from '../components/VideoGuideModal.jsx'
+import { useT } from '../lib/i18n.js'
 
 function Pill({ children }) {
   return (
@@ -29,6 +30,7 @@ function SectionTitle({ eyebrow, title, desc }) {
 
 export function Home() {
   const navigate = useNavigate()
+  const { t, tCrop } = useT()
   const [crop, setCrop] = useState('Tomato')
   const crops = useMemo(() => CROPS, [])
   const [videoOpen, setVideoOpen] = useState(false)
@@ -42,7 +44,7 @@ export function Home() {
         open={videoOpen}
         onClose={() => setVideoOpen(false)}
         videoUrl={GUIDE_VIDEO_URL}
-        title="KrishiAI Farmer Walkthrough"
+        title={t('guide.title')}
       />
       <section className="relative overflow-hidden rounded-3xl border border-white/10 shadow-glow">
         <div
@@ -59,10 +61,10 @@ export function Home() {
         <div className="relative grid min-h-[calc(100svh-140px)] gap-10 px-6 py-14 lg:grid-cols-2 lg:gap-12 lg:px-10">
           <div className="space-y-6">
             <div className="flex flex-wrap gap-2">
-              <Pill>Live mandi prices</Pill>
-              <Pill>AI prediction</Pill>
-              <Pill>Demand intelligence</Pill>
-              <Pill>Market finder</Pill>
+              <Pill>{t('nav.livePrices')}</Pill>
+              <Pill>{t('nav.aiPrediction')}</Pill>
+              <Pill>{t('nav.weather')}</Pill>
+              <Pill>{t('nav.marketFinder')}</Pill>
             </div>
 
             <motion.h1
@@ -71,17 +73,21 @@ export function Home() {
               transition={{ duration: 0.7, ease: 'easeOut' }}
               className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl"
             >
-              <span className="krishi-gradient-text">AI Powered</span> Crop Market Intelligence
+              <span className="krishi-gradient-text">{t('home.title')}</span> {t('home.titleGradient')}
             </motion.h1>
             <p className="max-w-xl text-pretty text-white/70">
-              Helping farmers predict prices, analyze demand, and find the best markets to
-              sell—built for Karnataka today, scalable for India tomorrow.
+              {t('home.subtitle')}
             </p>
+
+            <div className="flex items-center gap-2 rounded-xl bg-emerald-500/10 px-4 py-2 ring-1 ring-emerald-500/20 text-emerald-400 text-xs font-bold">
+              <span className="text-base">✓</span>
+              {t('home.verified')}
+            </div>
 
             <div className="neon-glass p-5">
               <div className="relative">
                 <div className="text-xs font-semibold uppercase tracking-wider text-white/60">
-                  Crop Search
+                  {t('nav.quickCrop')}
                 </div>
                 <div className="mt-3 grid gap-3 lg:grid-cols-[1fr_auto_auto] lg:items-center">
                   <div className="flex items-center gap-3 rounded-2xl bg-black/30 px-4 py-3 ring-1 ring-white/10 backdrop-blur">
@@ -95,7 +101,7 @@ export function Home() {
                     >
                       {crops.map((c) => (
                         <option key={c} value={c} className="bg-ink-900">
-                          {c}
+                          {tCrop(c)}
                         </option>
                       ))}
                     </select>
@@ -105,13 +111,13 @@ export function Home() {
                     onClick={() => navigate(`/ai-prediction?crop=${encodeURIComponent(crop)}`)}
                     className="rounded-2xl bg-gradient-to-r from-emerald-400 to-sky-400 px-6 py-3 text-sm font-semibold text-ink-950 transition hover:opacity-95"
                   >
-                    Try AI Prediction
+                    {t('nav.predict')}
                   </button>
                   <button
                     onClick={() => navigate('/demand-map')}
                     className="rounded-2xl bg-white/10 px-6 py-3 text-sm font-semibold text-white ring-1 ring-white/15 transition hover:bg-white/15"
                   >
-                    Explore Market Map
+                    {t('nav.demandMap')}
                   </button>
                 </div>
               </div>
@@ -122,38 +128,38 @@ export function Home() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="neon-glass p-5">
                 <div className="text-xs font-semibold uppercase tracking-wider text-white/60">
-                  Signal
+                  {t('nav.livePrices')}
                 </div>
-                <div className="mt-3 text-2xl font-semibold">District-wise insights</div>
+                <div className="mt-3 text-2xl font-semibold">{t('home.card1Title')}</div>
                 <p className="mt-2 text-sm text-white/65">
-                  Compare prices across Karnataka and find better selling opportunities.
+                  {t('home.card1Desc')}
                 </p>
               </div>
               <div className="neon-glass p-5">
                 <div className="text-xs font-semibold uppercase tracking-wider text-white/60">
-                  Model
+                  {t('nav.aiPrediction')}
                 </div>
-                <div className="mt-3 text-2xl font-semibold">Regression forecasting</div>
+                <div className="mt-3 text-2xl font-semibold">{t('home.card2Title')}</div>
                 <p className="mt-2 text-sm text-white/65">
-                  Predict future prices using historical price signals and seasonality.
+                  {t('home.card2Desc')}
                 </p>
               </div>
             </div>
             <div className="neon-glass p-5">
               <div className="text-xs font-semibold uppercase tracking-wider text-white/60">
-                Pitch-ready dashboard
+                {t('home.badge')}
               </div>
               <div className="mt-3 text-2xl font-semibold">
-                Glassmorphism • Motion • Charts • Maps
+                {t('home.card3Title')}
               </div>
               <p className="mt-2 text-sm text-white/65">
-                A modern agritech UI designed to impress investors while staying farmer-first.
+                {t('home.card3Desc')}
               </p>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 {[
-                  { k: 'States', v: '1 (Karnataka)' },
-                  { k: 'Districts', v: '29 covered' },
-                  { k: 'Crops', v: '20 supported' },
+                  { k: t('home.stat1Label'), v: t('home.stat1Value') },
+                  { k: t('home.stat2Label'), v: t('home.stat2Value') },
+                  { k: t('home.stat3Label'), v: t('home.stat3Value') },
                 ].map((s) => (
                   <div key={s.k} className="rounded-xl bg-white/5 p-3 ring-1 ring-white/10">
                     <div className="text-xs text-white/60">{s.k}</div>
@@ -168,9 +174,9 @@ export function Home() {
 
       <section id="video-guide" className="space-y-8">
         <SectionTitle
-          eyebrow="AI Video Guide"
-          title="One-tap walkthrough for farmers"
-          desc="A simple voice-guided video that explains how to use every feature of KrishiAI."
+          eyebrow={t('nav.weather')}
+          title={t('guide.title')}
+          desc={t('home.subtitle')}
         />
 
         <div className="mx-auto max-w-5xl">
@@ -194,45 +200,44 @@ export function Home() {
                   <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3">
                     <div className="text-left">
                       <div className="text-xs font-semibold uppercase tracking-wider text-white/60">
-                        Click to play
+                        {t('guide.clickToPlay')}
                       </div>
                       <div className="mt-1 text-sm font-semibold">
-                        How to use KrishiAI (full website)
+                        {t('guide.howToUse')}
                       </div>
                     </div>
                     <div className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/70 ring-1 ring-white/10">
-                      2–3 min
+                      {t('guide.duration')}
                     </div>
                   </div>
                 </div>
               </button>
 
               <div className="space-y-4">
-                <div className="text-lg font-semibold">What the guide covers</div>
+                <div className="text-lg font-semibold">{t('guide.coversTitle')}</div>
                 <ul className="space-y-2 text-sm text-white/70">
-                  <li>1) Live Prices: filter crop & district</li>
-                  <li>2) AI Prediction: get future price + chart</li>
-                  <li>3) Market Finder: best district to sell</li>
-                  <li>4) Demand Map: district demand colors</li>
-                  <li>5) District Comparison: price bar chart</li>
+                  <li>{t('guide.item1')}</li>
+                  <li>{t('guide.item2')}</li>
+                  <li>{t('guide.item3')}</li>
+                  <li>{t('guide.item4')}</li>
+                  <li>{t('guide.item5')}</li>
                 </ul>
                 <div className="rounded-2xl bg-white/5 p-4 text-xs text-white/60 ring-1 ring-white/10">
-                  Tip: Put your AI guide video URL in{' '}
-                  <span className="font-mono text-white/80">frontend/.env</span> as{' '}
-                  <span className="font-mono text-white/80">VITE_GUIDE_VIDEO_URL</span>.
+                  {t('guide.tip')}:{' '}
+                  <span className="font-mono text-white/80">frontend/.env</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setVideoOpen(true)}
                     className="rounded-2xl bg-gradient-to-r from-emerald-400 to-sky-400 px-5 py-3 text-sm font-semibold text-ink-950 transition hover:opacity-95"
                   >
-                    Watch guide
+                    {t('guide.watch')}
                   </button>
                   <button
                     onClick={() => navigate('/live-prices')}
                     className="rounded-2xl bg-white/10 px-5 py-3 text-sm font-semibold text-white ring-1 ring-white/15 transition hover:bg-white/15"
                   >
-                    Start with Live Prices
+                    {t('guide.start')}
                   </button>
                 </div>
               </div>
@@ -243,23 +248,23 @@ export function Home() {
 
       <section id="problem" className="space-y-8">
         <SectionTitle
-          eyebrow="Problem"
-          title="Farmers sell at low prices due to lack of market intelligence"
-          desc="Most small and mid-size farmers lack timely, district-level visibility into price trends and demand signals."
+          eyebrow={t('problem.eyebrow')}
+          title={t('problem.title')}
+          desc={t('problem.desc')}
         />
         <div className="grid gap-4 md:grid-cols-3">
           {[
             {
-              t: 'No price prediction',
-              d: 'Without forecasts, farmers can’t time the market or plan harvest decisions.',
+              t: t('problem.item1Title'),
+              d: t('problem.item1Desc'),
             },
             {
-              t: 'No demand visibility',
-              d: 'Demand varies by district and season—yet tools rarely visualize it clearly.',
+              t: t('problem.item2Title'),
+              d: t('problem.item2Desc'),
             },
             {
-              t: 'Limited market awareness',
-              d: 'Farmers miss higher-paying mandis because comparisons are time-consuming.',
+              t: t('problem.item3Title'),
+              d: t('problem.item3Desc'),
             },
           ].map((c) => (
             <div key={c.t} className="glass rounded-2xl p-6">
@@ -272,35 +277,35 @@ export function Home() {
 
       <section id="solution" className="space-y-8">
         <SectionTitle
-          eyebrow="Solution"
-          title="KrishiAI turns raw market data into clear selling decisions"
-          desc="A single platform for live prices, AI forecasts, market discovery, and district-level demand intelligence."
+          eyebrow={t('solution.eyebrow')}
+          title={t('solution.title')}
+          desc={t('solution.desc')}
         />
         <div className="grid gap-4 lg:grid-cols-2">
           {[
             {
-              t: 'Live mandi price dashboard',
-              d: 'Filter by crop and district to get actionable signals instantly.',
+              t: t('solution.item1Title'),
+              d: t('solution.item1Desc'),
               a: () => navigate('/live-prices'),
-              cta: 'View live prices',
+              cta: t('solution.item1Cta'),
             },
             {
-              t: 'AI price prediction',
-              d: 'Regression model predicts near-future price using trend + seasonality features.',
+              t: t('solution.item2Title'),
+              d: t('solution.item2Desc'),
               a: () => navigate('/ai-prediction'),
-              cta: 'Try prediction',
+              cta: t('solution.item2Cta'),
             },
             {
-              t: 'Market comparison',
-              d: 'Find the best district to sell and compare price distribution with charts.',
+              t: t('solution.item3Title'),
+              d: t('solution.item3Desc'),
               a: () => navigate('/market-finder'),
-              cta: 'Find best market',
+              cta: t('solution.item3Cta'),
             },
             {
-              t: 'District demand heatmap',
-              d: 'Interactive map overlay showing district demand levels for quick opportunity spotting.',
+              t: t('solution.item4Title'),
+              d: t('solution.item4Desc'),
               a: () => navigate('/demand-map'),
-              cta: 'Explore demand map',
+              cta: t('solution.item4Cta'),
             },
           ].map((f) => (
             <div key={f.t} className="glass rounded-2xl p-6">
@@ -321,52 +326,23 @@ export function Home() {
         </div>
       </section>
 
-      <section id="technology" className="space-y-8">
-        <SectionTitle
-          eyebrow="Technology"
-          title="Built like a real startup product"
-          desc="Fast UI, credible ML pipeline, and clean API boundaries for deployment on Vercel + Render."
-        />
-        <div className="grid gap-4 md:grid-cols-3">
-          {[
-            {
-              t: 'Machine learning models',
-              d: 'Scikit-learn regression trained on crop + district + date features.',
-            },
-            { t: 'Market data analytics', d: 'Pandas transforms price trends & demand signals.' },
-            {
-              t: 'Location based insights',
-              d: 'Leaflet overlays demand per district for quick scanning.',
-            },
-          ].map((c) => (
-            <div key={c.t} className="glass rounded-2xl p-6">
-              <div className="text-lg font-semibold">{c.t}</div>
-              <p className="mt-2 text-sm text-white/65">{c.d}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
       <section id="investor" className="space-y-8">
         <SectionTitle
-          eyebrow="Investor"
-          title="A scalable agritech intelligence platform"
-          desc="KrishiAI can evolve into a national crop market intelligence layer for farmers, traders, and agri-fintech."
+          eyebrow={t('investorInfo.founder')}
+          title={t('investorInfo.title')}
+          desc={t('investorInfo.subtitle')}
         />
         <div className="grid gap-4 lg:grid-cols-3">
           <div className="glass rounded-2xl p-6 lg:col-span-2">
-            <div className="text-lg font-semibold">Why now</div>
+            <div className="text-lg font-semibold">{t('investorInfo.startupPotential')}</div>
             <p className="mt-2 text-sm text-white/65">
-              India has over <span className="font-semibold text-white">140 million</span>{' '}
-              farmers, and agritech adoption is accelerating with digital payments, logistics,
-              and advisory. A trusted “market intelligence” layer unlocks better pricing and
-              reduces middleman advantage.
+              {t('investorInfo.startupDesc')}
             </p>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               {[
-                { k: 'TAM', v: 'National scale' },
-                { k: 'Moat', v: 'Data + distribution' },
-                { k: 'Revenue', v: 'SaaS + lead gen' },
+                { k: 'TAM', v: t('investorInfo.national') },
+                { k: t('investorInfo.moat'), v: t('investorInfo.moatValue') },
+                { k: t('investorInfo.revenue'), v: t('investorInfo.revenueValue') },
               ].map((s) => (
                 <div key={s.k} className="rounded-xl bg-white/5 p-3 ring-1 ring-white/10">
                   <div className="text-xs text-white/60">{s.k}</div>
@@ -376,17 +352,17 @@ export function Home() {
             </div>
           </div>
           <div className="glass rounded-2xl p-6">
-            <div className="text-lg font-semibold">Founder</div>
+            <div className="text-lg font-semibold">{t('investorInfo.founder')}</div>
             <div className="mt-2 text-sm text-white/70">
-              <div className="font-semibold text-white">Yashwanth</div>
-              <div>Information Science Engineering Student</div>
-              <div>Agritech Innovator</div>
+              <div className="font-semibold text-white">{t('investorInfo.yashwanth')}</div>
+              <div>{t('investorInfo.student')}</div>
+              <div>{t('investorInfo.innovator')}</div>
             </div>
             <button
               onClick={() => navigate('/investor-info')}
               className="mt-5 w-full rounded-xl bg-gradient-to-r from-emerald-400 to-sky-400 px-4 py-2.5 text-sm font-semibold text-ink-950"
             >
-              View investor info
+              {t('nav.investorInfo')}
             </button>
           </div>
         </div>

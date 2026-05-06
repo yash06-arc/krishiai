@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-
+import { useT } from '../lib/i18n.js'
 import { chatWithFarmerBot } from '../lib/api.js'
 
 function Bubble({ role, children }) {
@@ -22,17 +22,23 @@ function Bubble({ role, children }) {
 }
 
 export function FarmerChatWidget() {
+  const { t, lang } = useT()
   const [open, setOpen] = useState(false)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [isListening, setIsListening] = useState(false)
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      text:
-        "Hi! I'm KrishiAI Farmer Bot. Ask me about prices, prediction, best market, profit optimizer, logistics, alerts, or demand forecast.\n\nExample: “Tomato price in Mysuru”",
+      text: t('chatbot.welcome')
     },
   ])
   const scrollerRef = useRef(null)
+
+  // Update welcome message when language changes
+  useEffect(() => {
+    setMessages([{ role: 'assistant', text: t('chatbot.welcome') }])
+  }, [lang])
 
   useEffect(() => {
     if (!open) return
@@ -40,6 +46,41 @@ export function FarmerChatWidget() {
     if (!el) return
     el.scrollTop = el.scrollHeight
   }, [open, messages.length])
+
+  const startListening = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser.")
+      return
+    }
+
+    const recognition = new SpeechRecognition()
+    // Map internal language state to speech recognition locales
+    const langCode = lang === 'kn' ? 'kn-IN' : 'en-IN'
+    recognition.lang = langCode
+    recognition.interimResults = false
+    recognition.maxAlternatives = 1
+
+    recognition.onstart = () => {
+      setIsListening(true)
+    }
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript
+      setInput((prev) => prev + (prev ? ' ' : '') + transcript)
+    }
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error", event.error)
+      setIsListening(false)
+    }
+
+    recognition.onend = () => {
+      setIsListening(false)
+    }
+
+    recognition.start()
+  }
 
   async function send() {
     const text = input.trim()
@@ -55,8 +96,7 @@ export function FarmerChatWidget() {
         ...m,
         {
           role: 'assistant',
-          text:
-            'I could not reach the server. Please ensure the Flask backend is running on your API base URL.',
+          text: t('chatbot.error'),
         },
       ])
     } finally {
@@ -77,9 +117,9 @@ export function FarmerChatWidget() {
           >
             <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
               <div>
-                <div className="text-sm font-semibold">Farmer Chatbot</div>
+                <div className="text-sm font-semibold">{t('chatbot.title')}</div>
                 <div className="mt-0.5 text-[11px] text-white/60">
-                  Ask in English / Kannada / Hindi
+                  {t('chatbot.subtitle')}
                 </div>
               </div>
               <button
@@ -98,31 +138,38 @@ export function FarmerChatWidget() {
                 </Bubble>
               ))}
               {loading ? (
-                <div className="text-xs text-white/50">Thinking…</div>
+                <div className="text-xs text-white/50">{t('common.loading')}</div>
               ) : null}
             </div>
 
             <div className="border-t border-white/10 p-3">
-              <div className="flex gap-2">
+              <div className="flex gap-2 relative items-center">
                 <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') send()
                   }}
-                  placeholder="Ask a question…"
-                  className="w-full rounded-2xl bg-black/30 px-3 py-2 text-sm text-white outline-none ring-1 ring-white/10 focus:ring-2 focus:ring-emerald-400/40"
+                  placeholder={t('chatbot.placeholder')}
+                  className="w-full rounded-2xl bg-black/30 pl-3 pr-10 py-2 text-sm text-white outline-none ring-1 ring-white/10 focus:ring-2 focus:ring-emerald-400/40"
                 />
+                <button
+                  onClick={startListening}
+                  className={`absolute right-16 grid h-7 w-7 place-items-center rounded-xl transition ${isListening ? 'bg-red-500/20 text-red-400 animate-pulse' : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'}`}
+                  title="Speak"
+                >
+                  🎙
+                </button>
                 <button
                   onClick={send}
                   disabled={loading}
                   className="rounded-2xl bg-gradient-to-r from-emerald-400 to-sky-400 px-4 py-2 text-sm font-semibold text-ink-950 disabled:opacity-50"
                 >
-                  Send
+                  ►
                 </button>
               </div>
               <div className="mt-2 text-[11px] text-white/50">
-                Tip: Try “profit optimizer for Tomato from Mysuru”.
+                {t('chatbot.tip')}
               </div>
             </div>
           </motion.div>
@@ -139,4 +186,3 @@ export function FarmerChatWidget() {
     </div>
   )
 }
-
